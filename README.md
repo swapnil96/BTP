@@ -32,6 +32,16 @@ Many repos/modules are there in the internet although most of them are not maint
 
 * [This repo](https://github.com/ysh329/deep-learning-model-convertor) provides a guide to search for other repos/modules/softwares which can convert models across frameworks
 
-* [Mocha](https://github.com/kuangliu/mocha) Doesn't support **nn.SpatialConvolutionMM** layer, either change this layer to **SpatialConvolution**: process mentioned [here](https://discuss.pytorch.org/t/load-lua-got-unknown-lua-class/1678) or enhance the code to support the said layer. Also there can be other unsupported layers present
+* [FaceNet paper](https://github.com/davidsandberg/facenet) This repo provides tensorflow model of the facenet paper, although again training will be required
 
 * [th2caffe](https://github.com/e-lab/th2caffe) Needs to be checked
+
+* [More Links](https://discuss.pytorch.org/t/convert-import-torch-model-to-pytorch/37)
+
+* [Deserialize torch-serialized objects from Python](https://github.com/bshillingford/python-torchfile) Needs to be checked
+
+* [Opposite](https://github.com/fanq15/caffe_to_torch_to_pytorch) caffe to torch, although not sure will it work
+
+* [Mocha](https://github.com/kuangliu/mocha) Doesn't support **nn.SpatialConvolutionMM** layer, either change this layer to **SpatialConvolution**: process mentioned [here](https://discuss.pytorch.org/t/load-lua-got-unknown-lua-class/1678) or enhance the code to support the said layer. Also there can be other unsupported layers present
+
+* [pytorch](https://stackoverflow.com/questions/41861354/loading-torch7-trained-models-t7-in-pytorch) Can use this feature to convert torch models in pytorch to numpy array and then convert directly to caffe or use some other modules(needs to be checked). **Problem** it doesn't support **nn.SpatialConvolutionMM** layer, again alternative already mentioned above needs to be used
