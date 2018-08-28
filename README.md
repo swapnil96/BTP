@@ -34,7 +34,7 @@ Many repos/modules are there in the internet although most of them are not maint
 
 * [FaceNet paper](https://github.com/davidsandberg/facenet) This repo provides tensorflow model of the facenet paper, although again training will be required
 
-* [th2caffe](https://github.com/e-lab/th2caffe) Needs to be checked
+* [th2caffe](https://github.com/e-lab/th2caffe) Easy to install, doesn't support **SpatialCrossMapLRN** layer, need to see a workaround for that
 
 * [More Links](https://discuss.pytorch.org/t/convert-import-torch-model-to-pytorch/37)
 
