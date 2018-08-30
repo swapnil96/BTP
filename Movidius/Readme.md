@@ -7,3 +7,5 @@
 * [Official support](https://movidius.github.io/blog/ncs-apps-on-rpi/)
 
 * [Tutorial](https://www.pyimagesearch.com/2018/02/12/getting-started-with-the-intel-movidius-neural-compute-stick/)
+
+* [Movidius-face-MTCNN](https://github.com/ihere1/movidius-face)
