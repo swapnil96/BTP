@@ -8,6 +8,8 @@
 
 * [Tutorial](https://www.pyimagesearch.com/2018/02/12/getting-started-with-the-intel-movidius-neural-compute-stick/)
 
+* [Blog](http://hpc.imbiplaza.net/?p=265)
+
 * [Movidius-face-MTCNN](https://github.com/ihere1/movidius-face)
 
 * [MTCNN](https://github.com/Pi-DeepLearning/RaspberryPi-FaceDetection-MTCNN-Caffe-With-Motion)
