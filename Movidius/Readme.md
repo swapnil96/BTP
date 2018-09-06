@@ -10,6 +10,8 @@
 
 * [Blog](http://hpc.imbiplaza.net/?p=265)
 
+* [Convert model to graph](https://movidius.github.io/ncsdk/tf_compile_guidance.html)
+
 * [Movidius-face-MTCNN](https://github.com/ihere1/movidius-face)
 
 * [MTCNN](https://github.com/Pi-DeepLearning/RaspberryPi-FaceDetection-MTCNN-Caffe-With-Motion)
