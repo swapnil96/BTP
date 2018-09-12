@@ -8,7 +8,7 @@
 
 * [Tutorial](https://www.pyimagesearch.com/2018/02/12/getting-started-with-the-intel-movidius-neural-compute-stick/)
 
-* [Blog](http://hpc.imbiplaza.net/?p=265)
+* [Blog](http://hpc.imbiplaza.net/?p=265) [Blog describing classifier of FaceNet](https://medium.com/@vinayakvarrier/building-a-real-time-face-recognition-system-using-pre-trained-facenet-model-f1a277a06947)
 
 * [Convert model to graph](https://movidius.github.io/ncsdk/tf_compile_guidance.html)
 
