@@ -1,0 +1,75 @@
+https://github.com/facebook/thpp/issues/48
+https://github.com/facebookarchive/fblualib/blob/v1.0/install_all.sh#L83-L84
+
+https://github.com/facebookarchive/fblualib/blob/master/install_all.sh
+
+https://github.com/facebook/thpp/issues/11
+
+https://github.com/facebook/thpp/commit/d9f982c68d7522db9e77e50d135eaa86d84bab85#diff-22577c98d557ea9eca089e8e84d7f98d
+
+https://github.com/facebook/thpp/issues/44
+
+https://github.com/facebook/thpp/issues/44#issuecomment-318872848
+
+https://github.com/facebook/thpp/issues/44#issuecomment-323728095
+
+https://duckduckgo.com/?q=CMakeFiles%2Fthpp.dir%2FStorage.cpp.o%27+failed&t=hi&ia=web
+
+LD_PRELOAD /home/swapnil/caffe-1.0/distribute/lib/libcaffe.so
+
+PYTHONPATH /home/swapnil/caffe-1.0/distribute/python:/home/swapnil/caffe-1.0/python:/home/swapnil/fb-caffe-exts
+
+
+ADD_SUBDIRECTORY("googletest-release-1.7.0")
+INCLUDE_DIRECTORIES(
+  "${CMAKE_CURRENT_SOURCE_DIR}/googletest-release-1.7.0/include"
+)
+
+rm -rf googletest-release-1.7.0 googletest-release-1.7.0.zip
+curl -JLOk https://github.com/google/googletest/archive/release-1.7.0.zip
+#if [[ $($SHA -b googletest-release-1.7.0.zip | cut -d' ' -f1) != \
+#      'f89bc9f55477df2fde082481e2d709bfafdb057b' ]]; then
+#  echo "Invalid googletest-release-1.7.0.zip file" >&2
+#  exit 1
+#fi
+unzip googletest-release-1.7.0.zip
+
+https://github.com/facebookarchive/fblualib/blob/master/install_all.sh
+
+https://github.com/zhanghang1989/fb-caffe-exts
+ 
+ https://github.com/facebook/fbthrift/issues/249
+ 
+ thpp/ForwardDeclarations.h: No such file or directory
+ 
+ 'clockid_t' has a previous declaration as 'typedef __clockid_t clockid_t'
+ 
+ error: conflicting declaration ‘typedef uint8_t clockid_t’
+ typedef uint8_t clockid_t;
+
+No clock_gettime(2) compatibility wrapper available for this platform.
+
+ https://github.com/facebook/folly/commit/01919b98fd78769d8e73dc2c0f959743393e886e
+ 
+ https://gist.github.com/pfigue/9ce8a2c0b14a2542acd7
+ 
+ https://github.com/facebook/fbthrift/issues/131
+ 
+ 
+
+ https://github.com/facebook/fb-caffe-exts/issues/1
+ 
+ th -ltorch -e "torch.test()"
+
+https://github.com/torch/torch7/issues/705
+ 
+https://stackoverflow.com/questions/38449032/how-can-i-test-a-torch-installation 
+
+torch/install/lib/libTH.so.0: undefined symbol: dpotrf_
+
+	dlopen: cannot load any more object with static TLS
+
+bad argument #2 to 'error' (number expected, got string)
+
+
+
