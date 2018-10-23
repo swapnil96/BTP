@@ -17,3 +17,5 @@
 * [Movidius-face-MTCNN](https://github.com/ihere1/movidius-face)
 
 * [MTCNN](https://github.com/Pi-DeepLearning/RaspberryPi-FaceDetection-MTCNN-Caffe-With-Motion)
+
+* [NN network for spatial convolution](https://github.com/number9473/nn-algorithm/issues/26)
