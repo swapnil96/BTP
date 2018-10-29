@@ -19,3 +19,5 @@
 * [MTCNN](https://github.com/Pi-DeepLearning/RaspberryPi-FaceDetection-MTCNN-Caffe-With-Motion)
 
 * [NN network for spatial convolution](https://github.com/number9473/nn-algorithm/issues/26)
+
+* [FR in cloud](https://medium.com/@williamkoehrsen/facial-recognition-using-googles-convolutional-neural-network-5aa752b4240e)
