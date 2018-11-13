@@ -6,3 +6,6 @@
 
 ## Deep face
 * [Deep face caffe implementation](https://github.com/ydwen/caffe-face)
+
+## Other sources
+* [cs231n FD & FR project](http://cs231n.stanford.edu/reports/2017/pdfs/222.pdf)
