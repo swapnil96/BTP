@@ -5,13 +5,7 @@ from matplotlib import pyplot as plt
 import numpy, cv2
 import sys, os
 import cPickle as pickle, time
-
-IMAGES_DIR = "../"
-FACE_MATCH_THRESHOLD = 1.2
-VALID_DATA_DIR = IMAGES_DIR + 'valid_data/'
-
-FACENET_GRAPH_FILENAME = "facenet_celeb_ncs.graph"
-SSD_GRAPH_FILENAME = "ssd-face.graph"
+import argparse
 
 def transform_input(img, transpose=True, dtype=numpy.float32, W = 160, H = 160):
     inpt = cv2.resize(img, (W,H))
@@ -68,18 +62,18 @@ def detect_face(inference_output, img):
     #plt.show()
     return ans
 
-def setup():
+def setup(args):
     global facenet_graph, facenet_input_fifo, facenet_output_fifo, ssd_graph, ssd_input_fifo, ssd_output_fifo
     
     devices = mvncapi.enumerate_devices()
     device = mvncapi.Device(devices[0])
     device.open()
-    with open(FACENET_GRAPH_FILENAME, mode="rb") as f:
+    with open(args.facenetGraph, mode="rb") as f:
         facenet_graph_data = f.read()
     facenet_graph = mvncapi.Graph('facenet_graph')
     facenet_input_fifo, facenet_output_fifo = facenet_graph.allocate_with_fifos(device, facenet_graph_data)
 
-    with open(SSD_GRAPH_FILENAME, mode="rb") as f:
+    with open(args.ssdGraph, mode="rb") as f:
         ssd_graph_data = f.read()
     ssd_graph = mvncapi.Graph('ssd_graph')
     ssd_input_fifo, ssd_output_fifo = ssd_graph.allocate_with_fifos(device, ssd_graph_data)
@@ -123,12 +117,12 @@ def face_diff(face1_output, face2_output):
     
     return total_diff
     
-def run_image(inference_output, test_output):
+def run_image(inference_output, test_output, threshold):
     ranking = []
     for directory in inference_output:
         for valid_image in inference_output[directory]:
             diff = face_diff(valid_image, test_output)
-            if diff >= FACE_MATCH_THRESHOLD:
+            if diff >= threshold:
                 ranking.append([diff, "None"])
             else:
                 ranking.append([diff, directory])
@@ -158,36 +152,36 @@ def run_image(inference_output, test_output):
 
     return ans
 
-def train():
+def train(args):
 
-    setup()
-    valid_data_directory_list = os.listdir(VALID_DATA_DIR)
+    valid_data_directory_list = os.listdir(args.trainData)
     inference_output = {}
     for d in valid_data_directory_list:
-        dir_name = VALID_DATA_DIR + d
+        dir_name = args.trainData + "/" + d
 
         valid_image_filename_list = [
             dir_name + "/" + i for i in os.listdir(dir_name) if i.endswith(".jpg")]
-
-	done = 0
+        
+        done = 0
         for valid_image_filename in valid_image_filename_list:
             validated_image = cv2.imread(valid_image_filename)
             valid_output = run_inference(validated_image)
             if numpy.any(valid_output) == None:
-                print("No face detected in " + valid_image_filename + " in dir: " + dir_name)
+                if (args.verbose):
+                    print("No face detected in " + valid_image_filename + " in dir: " + dir_name)
                 continue
             if d in inference_output:
                 inference_output[d].append(valid_output)
             else:
                 inference_output[d] = [valid_output]
-	    done += 1
-	    if done == 10:
-		break
+            done += 1
+            if done == 10:
+                break
 
-    with open('model.pkl', 'wb') as mod:
+    with open(args.trainModel, 'wb') as mod:
         pickle.dump(inference_output, mod)
 
 # main entry point for program. we'll call main() to do what needs to be done.
-if __name__ == "__main__":
-    sys.exit(train())
+# if __name__ == "__main__":
+#     sys.exit(train())
 

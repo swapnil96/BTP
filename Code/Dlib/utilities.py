@@ -3,31 +3,16 @@
 from mvnc import mvncapi as mvnc
 import numpy
 import cv2
-import sys
-import os
+import sys, os
 import cPickle as pickle
 import openface
 import time
-
-IMAGES_DIR = '../'
-
-VALID_DATA_DIR = IMAGES_DIR + 'valid_data/'
-
-GRAPH_FILENAME = "../facenet_celeb_ncs.graph"
-
-# the same face will return 0.0
-# different faces return higher numbers
-# this is NOT between 0.0 and 1.0
-FACE_MATCH_THRESHOLD = 1.2
-
-DLIB_FACE_PREDICTOR = "shape_predictor_68_face_landmarks.dat"
 
 def detect_face(bgrImg, align, imgDim = 160, multipleFaces = False):
     if bgrImg is None:
         raise Exception("Unable to load image/frame")
 
     rgbImg = cv2.cvtColor(bgrImg, cv2.COLOR_BGR2RGB)
-    
     if (multipleFaces):
         # Get all bounding boxes
         bb = align.getAllFaceBoundingBoxes(rgbImg)
@@ -47,17 +32,14 @@ def detect_face(bgrImg, align, imgDim = 160, multipleFaces = False):
             raise Exception("Unable to align the frame")
 
         return alignedFaces
-
     else:
         # Get the largest face bounding box
-        start = time.time()
         bb = align.getLargestFaceBoundingBox(rgbImg) #Bounding box
         alignedFace = align.align(
                                 imgDim,
                                 rgbImg,
                                 bb,
                                 landmarkIndices=openface.AlignDlib.OUTER_EYES_AND_NOSE)
-        print("Time to align: " + str(time.time()-start))
         ans = [alignedFace]
         return ans
 
@@ -80,28 +62,24 @@ def preprocess_image(src):
 
     return preprocessed_image
 
-def run_inference(image_to_classify, facenet_graph, dlib_model):
+def run_inference(image_to_classify):
+    global graph, align
 
     scaled_image = cv2.resize(image_to_classify, (640, 480))
-
-    face_image = detect_face(scaled_image, dlib_model)
+    face_image = detect_face(scaled_image, align)
     if len(face_image) == 0 or numpy.any(face_image[0]) == None:
         return None
         
-    resized_image = preprocess_image(face_image)
+    resized_image = preprocess_image(face_image[0])
     # ***************************************************************
     # Send the image to the NCS
     # ***************************************************************
-    facenet_graph.LoadTensor(resized_image.astype(numpy.float16), None)
+    graph.LoadTensor(resized_image.astype(numpy.float16), None)
 
     # ***************************************************************
     # Get the result from the NCS
     # ***************************************************************
-    output, userobj = facenet_graph.GetResult()
-
-    #print("Total results: " + str(len(output)))
-    #print(output)
-
+    output, _ = graph.GetResult()
     return output
 
 def face_diff(face1_output, face2_output):
@@ -116,12 +94,12 @@ def face_diff(face1_output, face2_output):
     
     return total_diff
     
-def run_image(inference_output, test_output):
+def run_image(inference_output, test_output, threshold):
     ranking = []
     for directory in inference_output:
         for valid_image in inference_output[directory]:
             diff = face_diff(valid_image, test_output)
-            if diff >= FACE_MATCH_THRESHOLD:
+            if diff >= threshold:
                 ranking.append([diff, "None"])
             else:
                 ranking.append([diff, directory])
@@ -151,44 +129,34 @@ def run_image(inference_output, test_output):
 
     return ans
 
-def train():
-
+def setup(args):
+    global graph, align
     devices = mvnc.EnumerateDevices()
     if len(devices) == 0:
         print('No NCS devices found')
         quit()
 
-    # Pick the first stick to run the network
     device = mvnc.Device(devices[0])
-
-    # Open the NCS
     device.OpenDevice()
-
-    # The graph file that was created with the ncsdk compiler
-    graph_file_name = GRAPH_FILENAME
-
-    # read in the graph file to memory buffer
+    graph_file_name = args.facenetGraph
     with open(graph_file_name, mode='rb') as f:
         graph_in_memory = f.read()
 
-    # create the NCAPI graph instance from the memory buffer containing the graph file.
     graph = device.AllocateGraph(graph_in_memory)
+    align = openface.AlignDlib(args.dlib)
 
-    # Dlib model
-    align = openface.AlignDlib(DLIB_FACE_PREDICTOR)
-
-    valid_data_directory_list = os.listdir(VALID_DATA_DIR)
-    size = len(valid_data_directory_list)
+def train(args):
+    valid_data_directory_list = os.listdir(args.trainData)
     inference_output = {}
     for d in valid_data_directory_list:
-        dir_name = VALID_DATA_DIR + d
+        dir_name = args.trainData + "/" + d
 
-        valid_image_filename_list = [
-            dir_name + "/" + i for i in os.listdir(dir_name) if i.endswith(".jpg")]
-
+        valid_image_filename_list = [dir_name + "/" + i for i in os.listdir(dir_name) if i.endswith(".jpg")]
+        done = 0
         for valid_image_filename in valid_image_filename_list:
             validated_image = cv2.imread(valid_image_filename)
-            valid_output = run_inference(validated_image, graph, align)
+
+            valid_output = run_inference(validated_image)
             if numpy.any(valid_output) == None:
                 print("No face detected in " + valid_image_filename + " in dir: " + dir_name)
                 continue
@@ -196,15 +164,9 @@ def train():
                 inference_output[d].append(valid_output)
             else:
                 inference_output[d] = [valid_output]
+            done += 1
+            if done == 5:
+                break
     
-    with open('model.pkl', 'wb') as mod:
+    with open(args.trainModel, 'wb') as mod:
         pickle.dump(inference_output, mod)
-
-    # Clean up the graph and the device
-    graph.DeallocateGraph()
-    device.CloseDevice()
-
-# main entry point for program. we'll call main() to do what needs to be done.
-if __name__ == "__main__":
-    sys.exit(train())
-

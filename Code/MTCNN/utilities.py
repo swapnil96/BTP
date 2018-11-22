@@ -6,29 +6,43 @@ import sys, os
 import cPickle as pickle
 import fd
 
-IMAGES_DIR = '../'
+def getPaddingSize(img):
+    h, w, _ = img.shape
+    top, bottom, left, right = (0,0,0,0)
 
-VALID_DATA_DIR = IMAGES_DIR + 'valid_data/'
+    if w < int(h / 3 * 4):
+        tmp = int(h / 3 * 4) - w
+        left = tmp // 2
+        right = tmp - left
+    elif h < int(w / 4 * 3):
+        tmp = int(w / 4 * 3) - h
+        top = tmp // 2
+        bottom = tmp - top
+    else:
+        pass
+    return top, bottom, left, right
 
-GRAPH_FILENAME = "../facenet_celeb_ncs.graph"
-
-FACE_MATCH_THRESHOLD = 1.2
-
-def run_inference(image_to_classify):
+def run_inference(image_to_classify, args):
 
     scaled_image = cv2.resize(image_to_classify, (640, 480))
-    face_image = fd.detect_face(scaled_image)
+    
+    image = scaled_image
+    top,bottom,left,right = getPaddingSize(image)
+    image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[0,0,0])
+    frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    face_image = fd.detect_face(frame)
     if len(face_image) == 0 or numpy.any(face_image[0]) == None:
         return None
         
-    resized_image = preprocess_image(face_image)
+    resized_image = preprocess_image(face_image[0])
     # ***************************************************************
     # Send the image to the NCS
     # ***************************************************************
     devices = mvnc.EnumerateDevices()
     device = mvnc.Device(devices[0])
     device.OpenDevice()
-    graph_file_name = GRAPH_FILENAME
+    graph_file_name = args.facenetGraph
     with open(graph_file_name, mode='rb') as f:
         graph_in_memory = f.read()
 
@@ -75,12 +89,12 @@ def face_diff(face1_output, face2_output):
     
     return total_diff
     
-def run_image(inference_output, test_output):
+def run_image(inference_output, test_output, threshold):
     ranking = []
     for directory in inference_output:
         for valid_image in inference_output[directory]:
             diff = face_diff(valid_image, test_output)
-            if diff >= FACE_MATCH_THRESHOLD:
+            if diff >= threshold:
                 ranking.append([diff, "None"])
             else:
                 ranking.append([diff, directory])
@@ -110,29 +124,35 @@ def run_image(inference_output, test_output):
 
     return ans
 
-def train():
-    valid_data_directory_list = os.listdir(VALID_DATA_DIR)
-    size = len(valid_data_directory_list)
+def train(args):
+    valid_data_directory_list = os.listdir(args.trainData)
     inference_output = {}
     for d in valid_data_directory_list:
-        dir_name = VALID_DATA_DIR + d
+        dir_name = args.trainData + "/" + d
 
         valid_image_filename_list = [
             dir_name + "/" + i for i in os.listdir(dir_name) if i.endswith(".jpg")]
 
+        done = 0
         for valid_image_filename in valid_image_filename_list:
             validated_image = cv2.imread(valid_image_filename)
-            valid_output = run_inference(validated_image)
-
+            valid_output = run_inference(validated_image, args)
+            if numpy.any(valid_output) == None:
+                if (args.verbose):
+                    print("No face detected in " + valid_image_filename + " in dir: " + dir_name)
+                continue
             if d in inference_output:
                 inference_output[d].append(valid_output)
             else:
                 inference_output[d] = [valid_output]
+            done += 1
+            if done == 10:
+                break
     
-    with open('model.pkl', 'wb') as mod:
+    with open(args.trainModel, 'wb') as mod:
         pickle.dump(inference_output, mod)
 
 # main entry point for program. we'll call main() to do what needs to be done.
-if __name__ == "__main__":
-    sys.exit(train())
+# if __name__ == "__main__":
+#     sys.exit(train())
 

@@ -19,10 +19,10 @@ def imresample(img, sz):
     im_data = cv2.resize(img, (sz[1], sz[0]), interpolation=cv2.INTER_AREA)
     return im_data
 
-def detect_face(image, threshold = [0.405, 0.8473], factor=0.709):
+def detect_face(img, threshold = [0.405, 0.8473], factor=0.709):
+    image = img
     w = 128
     h = 96
-    img = image
     scale_factor = img.shape[1] / w
     img = cv2.resize(img, (w, h))
 
@@ -37,8 +37,8 @@ def detect_face(image, threshold = [0.405, 0.8473], factor=0.709):
 
     pgraph = device.AllocateGraph(pgraphfile)
 
-    pgraph.LoadTensor(img_y[0].astype(np.float16), 'user object')
-    out, userobj = pgraph.GetResult()
+    pgraph.LoadTensor(img_y[0].astype(np.float16), None)
+    out, _ = pgraph.GetResult()
 
     pgraph.DeallocateGraph()
     device.CloseDevice()
@@ -62,10 +62,12 @@ def detect_face(image, threshold = [0.405, 0.8473], factor=0.709):
         qq2 = total_boxes[:, 1] + total_boxes[:, 6] * regh
         qq3 = total_boxes[:, 2] + total_boxes[:, 7] * regw
         qq4 = total_boxes[:, 3] + total_boxes[:, 8] * regh
-        total_boxes = np.transpose(np.vstack([qq1, qq2, qq3, qq4, total_boxes[:, 4]]))
+        total_boxes = np.transpose(
+            np.vstack([qq1, qq2, qq3, qq4, total_boxes[:, 4]]))
         total_boxes = rerec(total_boxes.copy())
         total_boxes[:, 0:4] = np.fix(total_boxes[:, 0:4]).astype(np.int32)
-        dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(total_boxes.copy(), w, h)
+        dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph = pad(
+            total_boxes.copy(), w, h)
     
     numbox = total_boxes.shape[0]
     
@@ -84,7 +86,7 @@ def detect_face(image, threshold = [0.405, 0.8473], factor=0.709):
         tempimg1 = np.transpose(tempimg, (3, 1, 0, 2))
 
         out = np.zeros((tempimg1.shape[0], 6))
-	
+
         device = mvnc.Device(devices[0])
         device.OpenDevice()
         ograph = device.AllocateGraph(ographfile)
@@ -93,14 +95,15 @@ def detect_face(image, threshold = [0.405, 0.8473], factor=0.709):
             ograph.LoadTensor(tempimg1[k].astype(np.float16), 'user object')
             tempout, userobj = ograph.GetResult()
             out[k, :] = tempout[:6]
-		
-	    ograph.DeallocateGraph()
+
+        ograph.DeallocateGraph()
         device.CloseDevice()
 
         out = np.transpose(out)
         score = out[1, :] - out[0, :]
         ipass = np.where(score > threshold[1])
-        total_boxes = np.hstack([total_boxes[ipass[0], 0:4].copy(), np.expand_dims(score[ipass].copy(), 1)])
+        total_boxes = np.hstack(
+            [total_boxes[ipass[0], 0:4].copy(), np.expand_dims(score[ipass].copy(), 1)])
         mv = out[2:, ipass[0]]
 
         w = total_boxes[:, 2] - total_boxes[:, 0] + 1

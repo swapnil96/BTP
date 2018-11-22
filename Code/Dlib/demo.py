@@ -1,38 +1,28 @@
 import faceRecognition as fr
 import os, cv2, time
+import argparse
+import cPickle as pickle
 
-curr = os.getcwd()
-
-DATA_DIR = "../raw/"
-
-
-def main():
+def main(args):
     start1 = time.time()
-    fr.setup()
-    print ("Setup time:", time.time() - start1)
-    data_directory_list = os.listdir(DATA_DIR)
-    size = len(data_directory_list)
+    model = fr.setup(args)
+    if (args.verbose):
+        print ("Setup time:", time.time() - start1)
+    data_directory_list = os.listdir(args.testData)
     matrix = {}
-    idx = 0
+    detect = 0
     not_detect = 0
     for d in data_directory_list:
-        dir_name = DATA_DIR + d
+        dir_name = args.testData + "/" + d
 
-        image_filename_list = [
-            dir_name + "/" + i for i in os.listdir(dir_name) if i.endswith(".jpg")]
-
+        image_filename_list = [dir_name + "/" + i for i in os.listdir(dir_name) if i.endswith(".jpg")]
+        t = time.time()
         for image_filename in image_filename_list:
-            if idx < 5:
-                start2 = time.time()
-            
-            output = fr.run(image_filename)
-            
-            if idx < 2:
-                print ("Total prediction time:", time.time() - start2)
-            
+            output = fr.run(model, image_filename, args.threshold)
             if len(output) == 0:
                 not_detect += 1
-                print ("No result")
+                if (args.verbose):
+                    print ("No result", image_filename)
                 continue
 
             if d in matrix:
@@ -42,9 +32,47 @@ def main():
                     matrix[d][output[0]] = 1
             else:
                 matrix[d] = {output[0]: 1}
-            idx += 1
-    
-    print matrix
+            detect += 1
+            if (args.verbose):
+                print ("Time for processing", time.time()-t)
+            t = time.time()
+
+    if (args.verbose):
+        print not_detect, detect
+        print matrix
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-fG',
+        '--facenetGraph',
+        type=str,
+        help="graph file for facenet",
+        default="../facenet_celeb_ncs.graph")
+    parser.add_argument(
+        '-dL',
+        '--dlib',
+        type=str,
+        help="dlib model dat file",
+        default="shape_predictor_68_face_landmarks.dat")
+    parser.add_argument(
+        '-tD',
+        '--testData',
+        type=str,
+        help="Path to test image for testing",
+        default='../raw')
+    parser.add_argument(
+        '-tM',
+        '--testModel',
+        type=str,
+        help="Path to pickle model for testing",
+        default='model.pkl')
+    parser.add_argument(
+        '-t',
+        '--threshold',
+        type=float,
+        default=1.2,
+        help='Face recognition threshold for facenet')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    args = parser.parse_args()
+    main(args)

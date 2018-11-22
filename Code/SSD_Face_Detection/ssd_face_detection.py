@@ -10,7 +10,7 @@ import utilities
 GRAPH_FILENAME = "ssd-face.graph"
 graph = None
 
-def setup(gpu_memory_fraction=0.25):
+def setup():
     
     global graph, model, align
 
