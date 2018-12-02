@@ -8,6 +8,17 @@ BTP related materials: Code, links, patches etc. Each folder contains a Readme.m
 
 * **Hack**: Contains bug details and links to install torch2caffe, although the installed version didn't worked
 
+## SSD Mobilenet
+
+* [Keras](https://github.com/bruceyang2012/Face-detection-with-mobilenet-ssd)
+* [Tutorial](https://towardsdatascience.com/how-to-train-a-tensorflow-face-object-detection-model-3599dcd0c26f)
+
+## YOLO
+
+* [Face recognition](https://github.com/xhuvom/darknetFaceID)
+* [Face detection](https://github.com/quanhua92/darknet/)
+* [Face detection](https://github.com/yeephycho/tensorflow-face-detection)
+
 # torch2Caffe
 [This](https://github.com/facebook/fb-caffe-exts) tool provided by facebook to convert pretrained torch models to caffe
 
